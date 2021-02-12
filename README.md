@@ -25,5 +25,10 @@ yarn test:unit
 yarn lint
 ```
 
+### Deploy
+```
+git push heroku master
+```
+
 ### Customize configuration
 See [Configuration Reference](https://cli.vuejs.org/config/).
