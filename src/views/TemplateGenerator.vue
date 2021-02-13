@@ -22,16 +22,16 @@
     <md-button @click="toggle" class="md-raised">杜撰切換</md-button>
     <md-button @click="generate" class="md-raised md-primary">產生</md-button>
 
+    <md-button v-if="questions.length > 0" @click="exportImage" class="md-raised md-primary">打包下載</md-button>
 
     <md-content>
-      <md-card v-for="(q, index) of questions" :key="index">
+      <md-card v-for="(q, index) of questions" :key="index" :id="'card-'+index">
         <md-card-header class="title">
           <div class="md-title">第{{index + 1}}題</div>
           <div class="md-subhead">(圖/{{q.painter}})</div>
         </md-card-header>
         <md-card-media >
           <div class="img" v-bind:style="{ backgroundImage: 'url(' + 'https://i.imgur.com/'+q.imageUrl + '_d.webp?maxwidth=640&shape=thumb&fidelity=medium' + ')' }"></div>
-          <!-- <img class="img" :src="'https://i.imgur.com/'+q.imageUrl + '_d.webp?maxwidth=640&shape=thumb&fidelity=medium'" alt=""> -->
         </md-card-media>
 
         <md-card-content>
@@ -59,18 +59,21 @@
 
 <script>
 import { TemplateGeneratorHelper } from '@/helpers/template-generator-helper'
+import domtoimage from 'dom-to-image';
+import { saveAs } from 'file-saver';
 
+const JSZip = require("jszip");
 
 export default {
     name: 'template-generator',
     data() {
       return {
         // inputs
-        userMocksRawInput:`匿名惡魔,杜撰答案001,杜撰答案002,杜撰答案002
-匿名嘟嘟,蘋果大人的愛情,杜撰答案002,杜撰答案002
-匿名織織,愛情真美好,杜撰答案002,杜撰答案002
-匿名皮皮,頭髮少大聯盟,杜撰答案002,杜撰答案002
-匿名考克,蘋果大人的愛情,杜撰答案002,杜撰答案002`,
+        userMocksRawInput:`惡魔,杜撰答案001,杜撰答案002,杜撰答案002
+嘟嘟,蘋果大人的愛情,杜撰答案002,杜撰答案002
+織織,愛情真美好,杜撰答案002,杜撰答案002
+皮皮,頭髮少大聯盟,杜撰答案002,杜撰答案002
+考克,蘋果大人的愛情,杜撰答案002,杜撰答案002`,
         answersRawInput: `蘋果大人的愛情,蘋果小人的愛情`,
         paintersRawInput: `邪惡的繪師,瘋狂的小畫家`,
         imageUrlsRawInput: `https://imgur.com/bubkkSl,https://imgur.com/xv39IE8`,
@@ -80,6 +83,24 @@ export default {
       }
     },
     methods: {
+      exportImage() {
+        const imagePromises = this.questions.map((q, index) => {
+          return domtoimage.toBlob(document.getElementById(`card-${index}`))
+        })
+        
+        Promise.all(imagePromises).then((blobs) => {
+          var zip = new JSZip();
+          blobs.forEach((blob, index) => {
+            let filename = `${index+1}.png`
+            if (this.showAuthor) filename = `ans_` + filename
+            zip.file(filename, blob);
+          })
+          zip.generateAsync({type:"blob"})
+            .then(function(content) {
+              saveAs(content, "crazy-painter-images.zip");
+            });
+        });
+      },
       toggle() {
         this.showAuthor = !this.showAuthor
       },
@@ -117,18 +138,18 @@ export default {
     line-height: 1.3em;
     font-size: 1.6em;
     .letter,.author {
-      padding-right: 3px;
       border-right: dashed 1px;
       margin-right: 3px;
     }
     .letter {
-      flex: 0 0 10%;
+      flex: 1 0 30px;
     }
     .author {
       font-weight: 600;
+      flex: 1 0 52px;
     }
-    .value, .author {
-      flex: 1 0 45%;
+    .value {
+      flex: 1 0 calc(100% - 90px);
     }
     &:nth-child(4n-3), &:nth-child(4n) {
       background: #d9d2e9;
