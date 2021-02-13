@@ -9,7 +9,6 @@ export interface Option {
 
 export interface Question {
     realAnswer: string;
-    imageUrl: string;
     painter: string;
     options: Option[];
 }

@@ -7,8 +7,8 @@
           <span class="md-helper-text"></span>
       </md-field>
       <md-field>
-        <label>圖片網址</label>
-        <md-input v-model="imageUrlsRawInput" required></md-input>
+        <label>圖片</label>
+        <md-file @change="previewMultiImage" multiple />
       </md-field>
       <md-field>
         <label>繪師</label>
@@ -31,7 +31,7 @@
           <div class="md-subhead">(圖/{{q.painter}})</div>
         </md-card-header>
         <md-card-media >
-          <div class="img" v-bind:style="{ backgroundImage: 'url(' + 'https://i.imgur.com/'+q.imageUrl + '_d.webp?maxwidth=640&shape=thumb&fidelity=medium' + ')' }"></div>
+          <img v-if="imageList[index]" :src="imageList[index]" />
         </md-card-media>
 
         <md-card-content>
@@ -76,8 +76,9 @@ export default {
 考克,蘋果大人的愛情,杜撰答案002,杜撰答案002`,
         answersRawInput: `蘋果大人的愛情,蘋果小人的愛情`,
         paintersRawInput: `邪惡的繪師,瘋狂的小畫家`,
-        imageUrlsRawInput: `https://imgur.com/bubkkSl,https://imgur.com/xv39IE8`,
+        // imageUrlsRawInput: `https://imgur.com/bubkkSl,https://imgur.com/xv39IE8`,
         // imageUrlsRawInput: `GhAZsK1,xv39IE8`,
+        imageList: [],
         questions: [],
         showAuthor: false,
       }
@@ -101,11 +102,27 @@ export default {
             });
         });
       },
+      previewMultiImage: function(event) {
+        const input = event.target;
+        let count = input.files.length;
+        let index = 0;
+        this.imageList = [];
+        if (input.files) {
+          while(count --) {
+            var reader = new FileReader();
+            reader.onload = (e) => {
+              this.imageList.push(e.target.result);
+            }
+            reader.readAsDataURL(input.files[index]);
+            index ++;
+          }
+        }
+      },
       toggle() {
         this.showAuthor = !this.showAuthor
       },
       generate() {
-        this.questions = TemplateGeneratorHelper.parseInput(this.userMocksRawInput, this.answersRawInput, this.imageUrlsRawInput,this.paintersRawInput);
+        this.questions = TemplateGeneratorHelper.parseInput(this.userMocksRawInput, this.answersRawInput, this.paintersRawInput);
       }
     }
 }

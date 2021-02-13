@@ -5,17 +5,14 @@ const CSV_SEPARATOR = ',';
 export const HOST_NAME = '主機';
 
 export class TemplateGeneratorHelper {
-    static parseInput(userMocksRawInput: string, answersRawInput: string, imageUrlsRawInput: string, paintersRawInput: string): Question[] {
+    static parseInput(userMocksRawInput: string, answersRawInput: string, paintersRawInput: string): Question[] {
         const userMocks = userMocksRawInput.split(/\n/);
         const answers = answersRawInput.split(CSV_SEPARATOR);
-        const imageUrls = imageUrlsRawInput.split(CSV_SEPARATOR).map(imgUrl => imgUrl.replace('https://imgur.com/a/', '').replace('https://imgur.com/', ''));
         const painters = paintersRawInput.split(CSV_SEPARATOR);
         const userMocksMap = this.parseUserMocks(userMocks);
         userMocksMap[HOST_NAME] = answers;
 
         let rs: Question[] = [];
-
-        if (answers.length !== imageUrls.length) throw('the number of answers and image urls does not match');
 
         answers.forEach((answer, index) => {
             const options: Option[] = [];
@@ -38,7 +35,6 @@ export class TemplateGeneratorHelper {
             rs.push({
                 realAnswer: answer,
                 painter: painters[index],
-                imageUrl: imageUrls[index],
                 options: this.shuffle(options).map((o, oi) => {
                     o.letter = this.toLetters(oi+1)
                     return o
